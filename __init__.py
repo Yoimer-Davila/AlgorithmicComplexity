@@ -1,5 +1,7 @@
 import sys
-sys.path.append('./AlgorithmicComplexity')
+folder_source = './AlgorithmicComplexity'
+if folder_source not in sys.path:
+    sys.path.append(folder_source)
 
 
 from .graphs import *
