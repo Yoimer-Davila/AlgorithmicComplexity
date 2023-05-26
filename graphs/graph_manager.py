@@ -1,5 +1,6 @@
 import graphviz as gv
 import numpy as np
+from graphs import AdjacencyList
 
 
 def from_adjacency_list(adjacency: list[str], weighted=False, sep="|"):
@@ -80,7 +81,8 @@ def adjacency_matrix_graph(matrix, labels=None, directed=False, weighted=False, 
     return graph
 
 
-def adjacency_list_graph(adjacency: list, labels=None, directed=False, weighted=False, path=None, layout="neato"):
+def adjacency_list_graph(adjacency: list | AdjacencyList, labels=None, directed=False, weighted=False, path=None,
+                         layout="neato"):
     if path is None:
         path = []
     graph = gv.Digraph("G") if directed else gv.Graph("G")
