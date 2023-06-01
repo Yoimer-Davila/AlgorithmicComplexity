@@ -24,7 +24,7 @@ ad_list.connect('Diplomado', 'QA', 2, True)
 ad_list.connect('Back', 'Front', 1, True)
 ad_list.connect('Back', 'Seguridad', 3, True)
 
-ad_list.add_node('Back')
+ad_list.add('Back')
 
 
 print(ad_list)

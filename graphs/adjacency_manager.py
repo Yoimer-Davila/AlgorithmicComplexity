@@ -4,12 +4,15 @@ class AdjacencyList:
         self.__weighted = weighted
         self.__size = 0 if size is None else size
 
-    def add_node(self, connections: list = None):
+    def add(self, connections: list = None):
         self.__list.append([] if connections is None else connections)
         self.__size += 1
 
+    def __value(self, index, value, weight):
+        return (value, weight) if weight is not None and self.__weighted else value
+
     def __connect(self, index, value, weight):
-        connection = (value, weight) if weight is not None and self.__weighted else value
+        connection = self.__value(index, value, weight)
         if connection not in self.__list[index]:
             self.__list[index].append(connection)
 
@@ -43,10 +46,10 @@ class NamedAdjacencyList(AdjacencyList):
         super().__init__(len(labels) if labels else None, weighted)
         self.__labels: list[str] = labels if labels else []
 
-    def add_node(self, label: str, connections: list = None):
+    def add(self, label: str, connections: list = None):
         if label not in self.__labels:
             self.__labels.append(label)
-            super().add_node(connections)
+            super().add(connections)
 
     def connect(self, label_a: str, label_b: str, weight: int = None, bidirectional=False):
         if label_b in self.__labels and label_a in self.__labels:
