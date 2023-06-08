@@ -61,17 +61,73 @@ def from_topology_names(_dict: dict, information):
     return graph
 
 
-def adjacency_matrix_graph(matrix, labels=None, directed=False, weighted=False, layout="neato"):
+def _base_graph(matrix, labels=None, directed=False, layout="neato", put_nodes=True):
     graph = gv.Digraph("G") if directed else gv.Graph("G")
     graph.graph_attr["layout"] = layout
-    graph.node_attr["style"] = "filled"
-    graph.node_attr["color"] = "orange"
-    n = len(matrix)
-    for u in range(n):
-        graph.node(str(u), labels[u] if labels else str(u))
+    graph.edge_attr["color"] = "gray"
+    graph.node_attr["color"] = "orangered"
+    graph.node_attr["width"] = "0.1"
+    graph.node_attr["height"] = "0.1"
+    graph.node_attr["fontsize"] = "8"
+    graph.node_attr["fontcolor"] = "mediumslateblue"
+    graph.node_attr["fontname"] = "monospace"
+    graph.edge_attr["fontsize"] = "8"
+    graph.edge_attr["fontname"] = "monospace"
 
-    for u in range(n):
-        for v in range(0 if directed else u, n):
+    n = len(matrix)
+    if put_nodes:
+        for u in range(n):
+            graph.node(str(u), labels[u] if labels else str(u))
+
+    return graph, n
+
+
+def max_flow_matrix_graph(matrix, labels=None, directed=False, weighted=False,
+                          layout="neato", paths=None, only_paths=True, path_color="orange"):
+    if paths is None:
+        paths = []
+
+    graph, size = _base_graph(matrix, labels, directed and not only_paths, layout)
+    for i in range(size):
+        for j in range(0 if directed else i, size):
+            value = matrix[i][j]
+            if weighted and not only_paths:
+                if value != 0:
+                    graph.edge(str(i), str(j), f"{value:.0f}")
+            else:
+                if value != 0:
+                    graph.edge(str(i), str(j))
+
+    def transform_path(paths):
+        transformed = {}
+
+        for sublist, number in paths:
+            for i in range(len(sublist) - 1):
+                value = tuple(sublist[i:i + 2])
+                if value in transformed:
+                    transformed[value] += number
+                else:
+                    transformed[value] = number
+
+        return list(transformed.items())
+
+    for index, path in enumerate(transform_path(paths)):
+        path, cost = path
+        for i in range(len(path) - 1):
+            source, target = path[i], path[i + 1]
+            graph.edge(str(source), str(target), str(cost),
+                       dir='forward',
+                       arrowsize="0.5",
+                       penwidth='0.5',
+                       color=path_color)
+    return graph
+
+
+def adjacency_matrix_graph(matrix, labels=None, directed=False, weighted=False, layout="neato"):
+    graph, size = _base_graph(matrix, labels, directed, layout)
+
+    for u in range(size):
+        for v in range(0 if directed else u, size):
             if weighted:
                 if not np.isnan(matrix[u, v]):
                     graph.edge(str(u), str(v), f"{matrix[u, v]:.0f}")
@@ -85,22 +141,9 @@ def adjacency_list_graph(adjacency: list | AdjacencyList, labels=None, directed=
                          layout="neato"):
     if path is None:
         path = []
-    graph = gv.Digraph("G") if directed else gv.Graph("G")
-    graph.graph_attr["layout"] = layout
-    graph.edge_attr["color"] = "gray"
-    graph.node_attr["color"] = "orangered"
-    graph.node_attr["width"] = "0.1"
-    graph.node_attr["height"] = "0.1"
-    graph.node_attr["fontsize"] = "8"
-    graph.node_attr["fontcolor"] = "mediumslateblue"
-    graph.node_attr["fontname"] = "monospace"
-    graph.edge_attr["fontsize"] = "8"
-    graph.edge_attr["fontname"] = "monospace"
 
-    n = len(adjacency)
-    for u in range(n):
-        graph.node(str(u), labels[u] if labels else str(u))
     added = set()
+    graph, size = _base_graph(adjacency, labels, directed, layout)
 
     for v, u in enumerate(path):
         if u is not None and u >= 0:
@@ -115,7 +158,7 @@ def adjacency_list_graph(adjacency: list | AdjacencyList, labels=None, directed=
             added.add(f"{v},{u}")
 
     if weighted:
-        for u in range(n):
+        for u in range(size):
             for v, w in adjacency[u]:
                 if not directed and f"{u},{v}" not in added:
                     added.add(f"{u},{v}")
@@ -124,7 +167,7 @@ def adjacency_list_graph(adjacency: list | AdjacencyList, labels=None, directed=
                 elif directed:
                     graph.edge(str(u), str(v), str(w))
     else:
-        for u in range(n):
+        for u in range(size):
             for v in adjacency[u]:
                 if not directed and f"{u},{v}" not in added:
                     added.add(f"{u},{v}")
