@@ -73,6 +73,7 @@ def _base_graph(matrix, labels=None, directed=False, layout="neato", put_nodes=T
     graph.node_attr["fontname"] = "monospace"
     graph.edge_attr["fontsize"] = "8"
     graph.edge_attr["fontname"] = "monospace"
+    graph.edge_attr['arrowsize'] = "0.5"
 
     n = len(matrix)
     if put_nodes:
