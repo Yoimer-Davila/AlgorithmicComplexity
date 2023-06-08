@@ -1,38 +1,27 @@
-from graphs import NamedAdjacencyList, show_graph, adjacency_list_graph, from_kruskal, kruskal, breadth_first_search_al
+from graphs import *
 
-labels = ['5to', 'Practicas', 'Diplomado', 'ChatGPT', 'Back', 'Front', 'Seguridad', 'QA', 'Gestion']
-ad_list = NamedAdjacencyList(labels, True)
+labels = ['u', 'v', 'w', 'x', 'y', 'z']
+ad_list = NamedMaxFlowMatrix(labels)
 
-ad_list.connect('5to', 'ChatGPT', 2, True)
-ad_list.connect('5to', 'Diplomado', 10, True)
-ad_list.connect('5to', 'Practicas', 5, True)
+ad_list.connect('u', 'v', 10)
+ad_list.connect('u', 'x', 7)
+ad_list.connect('u', 'w', 4)
 
-ad_list.connect('Practicas', 'Seguridad', 7, True)
-ad_list.connect('Practicas', 'Front', 2, True)
-ad_list.connect('Practicas', 'Gestion', 10, True)
-ad_list.connect('Practicas', 'Back', 3, True)
-ad_list.connect('Practicas', 'Diplomado', 5, True)
+ad_list.connect('v', 'y', 2)
+ad_list.connect('v', 'z', 6)
 
-ad_list.connect('Diplomado', 'ChatGPT', 10, True)
+ad_list.connect('x', 'v', 2)
+ad_list.connect('x', 'y', 10)
+ad_list.connect('x', 'w', 2)
 
-ad_list.connect('Diplomado', 'Front', 4, True)
-ad_list.connect('Diplomado', 'Back', 4, True)
-ad_list.connect('Diplomado', 'Seguridad', 2, True)
-ad_list.connect('Diplomado', 'Gestion', 3, True)
-ad_list.connect('Diplomado', 'QA', 2, True)
+ad_list.connect('y', 'z', 7)
+ad_list.connect('w', 'y', 2)
+ad_list.connect('w', 'z', 10)
 
-ad_list.connect('Back', 'Front', 1, True)
-ad_list.connect('Back', 'Seguridad', 3, True)
-
-ad_list.add('Back')
-
-
-print(ad_list)
-
-min_ad_list = kruskal(ad_list)
-path = breadth_first_search_al(from_kruskal(len(ad_list), min_ad_list), 0)
+source, sink = ad_list.label_index('u'), ad_list.label_index('z')
+max_flow, path = ford_fulkerson(ad_list, source, sink)
 print(path)
-graph = adjacency_list_graph(ad_list, weighted=True, path=path, labels=ad_list.labels(), layout='circo')
-show_graph(graph)
+print(max_flow)
+show_graph(max_flow_matrix_graph(ad_list, weighted=True, directed=True, layout='circo',  paths=path, labels=labels))
 
 
