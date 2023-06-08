@@ -1,6 +1,6 @@
 class __Adjacency:
     def __init__(self):
-        self._list = None
+        self._list: list = None
         self._weighted = None
         self._size = None
 
@@ -29,6 +29,13 @@ class __Adjacency:
 
     def __repr__(self):
         return self._list.__repr__()
+
+    def repr_list(self):
+        chars = str(self).replace('],', '],\n')
+        return chars
+
+    def copy(self):
+        return self._list.copy()
 
 
 class AdjacencyList(__Adjacency):
@@ -105,6 +112,11 @@ class AdjacencyMatrix(__Adjacency):
         self._size += 1
         [item.append(self._not_connected) for item in self._list]
         self._list.append(self.__zeros_list())
+
+    def copy(self):
+        adj = AdjacencyMatrix(self._size, self._weighted, self._not_connected)
+        adj._list = [item.copy() for item in self._list]
+        return adj
 
 
 class NamedAdjacencyMatrix(AdjacencyMatrix):
