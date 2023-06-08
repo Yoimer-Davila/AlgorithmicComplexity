@@ -1,3 +1,4 @@
+import copy
 import math
 import heapq as hq
 
@@ -206,11 +207,111 @@ def kruskal(graph):
     uf = DisjointSet(size)
 
     min_graph = []
+    weight = 0
     while edges and size > 0:
         w, u, v = hq.heappop(edges)
         if not uf.same_set(u, v):
+            weight += w
             uf.union(u, v)
             min_graph.append((u, v, w))
             size -= 1
 
-    return min_graph
+    return min_graph, weight
+
+
+def prim(graph, start=(0, 0)):
+    n = len(graph)
+    visited = [False] * n
+    path = [-1] * n
+    cost = [math.inf] * n
+    q = [start]
+    while q:
+        _, u = hq.heappop(q)
+        if not visited[u]:
+            visited[u] = True
+            for v, w in graph[u]:
+                if not visited[v] and w < cost[v]:
+                    cost[v] = w
+                    path[v] = u
+                    hq.heappush(q, (w, v))
+
+    weight = 0
+
+    for w in cost:
+        if w != math.inf:
+            weight += w
+    return path, weight
+
+
+def bfs_ff(graph, source, target, parent):
+    visited = [False] * len(graph)
+    queue = [[source]]  # Almacena caminos en lugar de nodos individuales
+    visited[source] = True
+
+    paths = []  # Almacena los caminos encontrados
+
+    while queue:
+        path = queue.pop(0)
+        u = path[-1]  # Último nodo en el camino actual
+        for ind in range(len(graph[u])):
+            if visited[ind] is False and graph[u][ind] > 0:
+                new_path = path + [ind]  # Agrega el nuevo nodo al camino
+                queue.append(new_path)
+                visited[ind] = True
+                parent[ind] = u
+                if ind == target:
+                    paths.append(new_path)  # Agrega el camino completo a los caminos encontrados
+
+    return visited[target], paths
+
+
+def ford_fulkerson(matrix, source, sink):
+    graph = matrix.copy()
+    parent = [-1] * len(graph)
+    max_flow = 0
+    paths = []  # Almacena los caminos utilizados
+
+    while True:
+        visited, path_list = bfs_ff(graph, source, sink, parent)
+        if visited:
+            path_flow = float("Inf")
+            for path in path_list:
+                for i in range(1, len(path)):
+                    path_flow = min(path_flow, graph[path[i - 1]][path[i]])
+                paths.append((path, path_flow))  # Agrega el camino actual a los caminos utilizados
+
+            for path in path_list:
+                for i in range(1, len(path)):
+                    graph[path[i - 1]][path[i]] -= path_flow
+                    graph[path[i]][path[i - 1]] += path_flow
+
+            max_flow += path_flow
+        else:
+            break
+
+    return max_flow, paths
+
+
+def ford_fulkerson_cost(graph, source, sink):
+    # This array is filled by BFS and to store path
+    parent = [-1] * (len(graph))
+    max_flow = 0
+    while bfs_ff(graph, source, sink, parent):
+        path_flow = float("Inf")
+        s = sink
+
+        while s != source:
+            # Find the minimum value in select path
+            path_flow = min(path_flow, graph[parent[s]][s])
+            s = parent[s]
+
+        max_flow += path_flow
+        v = sink
+
+        while v != source:
+            u = parent[v]
+            graph[u][v] -= path_flow
+            graph[v][u] += path_flow
+            v = parent[v]
+    return max_flow
+
