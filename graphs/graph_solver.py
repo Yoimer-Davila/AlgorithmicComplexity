@@ -292,11 +292,29 @@ def ford_fulkerson(matrix, source, sink):
     return max_flow, paths
 
 
-def ford_fulkerson_cost(graph, source, sink):
+def bfs_ff_cost(graph, source, target, parent):
+    # Return True if there is node that has not iterated.
+    visited = [False] * len(graph)
+    queue = [source]
+    visited[source] = True
+
+    while queue:
+        u = queue.pop(0)
+        for ind in range(len(graph[u])):
+            if visited[ind] is False and graph[u][ind] > 0:
+                queue.append(ind)
+                visited[ind] = True
+                parent[ind] = u
+
+    return visited[target]
+
+
+def ford_fulkerson_cost(matrix, source, sink):
     # This array is filled by BFS and to store path
+    graph = matrix.copy()
     parent = [-1] * (len(graph))
     max_flow = 0
-    while bfs_ff(graph, source, sink, parent):
+    while bfs_ff_cost(graph, source, sink, parent):
         path_flow = float("Inf")
         s = sink
 
@@ -314,4 +332,3 @@ def ford_fulkerson_cost(graph, source, sink):
             graph[v][u] += path_flow
             v = parent[v]
     return max_flow
-
