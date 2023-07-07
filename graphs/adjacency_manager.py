@@ -1,3 +1,6 @@
+import graphs
+
+
 class __Adjacency:
     def __init__(self):
         self._list: list = None
@@ -91,10 +94,13 @@ class AdjacencyMatrix(__Adjacency):
         self._size = 0 if size is None else size
         self._weighted = weighted
         self._not_connected = not_connected
-        self._list = [self.__zeros_list() for _ in range(self._size)]
+        self._list = [self._zeros_list() for _ in range(self._size)]
 
-    def __zeros_list(self):
+    def _zeros_list(self):
         return [self._not_connected] * self._size
+
+    def _init_list(self):
+        self._list = [self._zeros_list() for _ in range(self._size)]
 
     def matrix(self):
         return self._list
@@ -111,7 +117,7 @@ class AdjacencyMatrix(__Adjacency):
     def add(self):
         self._size += 1
         [item.append(self._not_connected) for item in self._list]
-        self._list.append(self.__zeros_list())
+        self._list.append(self._zeros_list())
 
     def copy(self):
         adj = AdjacencyMatrix(self._size, self._weighted, self._not_connected)
@@ -162,3 +168,51 @@ class NamedMaxFlowMatrix(NamedAdjacencyMatrix):
 
     def connect(self, label_a: str, label_b: str, weight: int, bidirectional=False):
         super().connect(label_a, label_b, weight, bidirectional)
+
+
+class DynamicProgrammingList(AdjacencyList):
+    def __init__(self, size: int):
+        super().__init__(size, weighted=True)
+        self._list = []
+
+    def _connect(self, index, value, weight):
+        connection = (index,) + self._value(value, weight)
+        if connection not in self._list:
+            self._list.append(connection)
+
+
+class NamedDynamicProgrammingList(NamedAdjacencyList):
+    def __init__(self, labels: list[str]):
+        super().__init__(labels, weighted=True)
+        self._list = []
+
+    def _connect(self, index, value, weight):
+        connection = (index,) + self._value(value, weight)
+        if connection not in self._list:
+            self._list.append(connection)
+
+
+class DynamicProgrammingMatrix(MaxFlowMatrix):
+    def __init__(self, size: int):
+        super().__init__(size)
+        self._not_connected = float("inf")
+        self._init_list()
+
+    def _init_list(self):
+        self._list = [
+            [self._not_connected if index != item else 0 for item in range(self._size)]
+            for index in range(self._size)
+        ]
+
+
+class NamedDynamicProgrammingMatrix(NamedMaxFlowMatrix):
+    def __init__(self, labels: list[str]):
+        super().__init__(labels)
+        self._not_connected = float("inf")
+        self._init_list()
+
+    def _init_list(self):
+        self._list = [
+            [self._not_connected if index != item else 0 for item in range(self._size)]
+            for index in range(self._size)
+        ]

@@ -1,8 +1,8 @@
-import copy
 import math
 import heapq as hq
 
-from graphs import DisjointSet
+from graphs import DisjointSet, NamedDynamicProgrammingMatrix, DynamicProgrammingMatrix, NamedDynamicProgrammingList, \
+    DynamicProgrammingList
 
 
 def dijkstra(graph, source, target=None):
@@ -332,3 +332,38 @@ def ford_fulkerson_cost(matrix, source, sink):
             graph[v][u] += path_flow
             v = parent[v]
     return max_flow
+
+
+def bellman_ford(_list: DynamicProgrammingList | NamedDynamicProgrammingList, source: int):
+    size = len(_list)
+    inf = float("inf")
+    distances = [inf] * size
+    if source < 0 or source > size:
+        return distances
+    distances[source] = 0
+
+    for _ in range(size):
+        for u, v, w in _list:
+            distance = distances[u] + w
+            if w == inf:
+                continue
+            if distances[u] != inf and distance < distances[v]:
+                distances[v] = distance
+
+    return distances
+
+
+def floyd_warshall(matrix: DynamicProgrammingMatrix | NamedDynamicProgrammingMatrix):
+    size = len(matrix)
+    distances = [[float("inf")] * size for _ in range(size)]
+
+    for i in range(size):
+        for j in range(size):
+            distances[i][j] = matrix[i][j]
+
+    for k in range(size):
+        for i in range(size):
+            for j in range(size):
+                distances[i][j] = min(distances[i][j], distances[i][k] + distances[k][j])
+
+    return distances

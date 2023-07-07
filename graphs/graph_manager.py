@@ -1,6 +1,7 @@
 import graphviz as gv
 import numpy as np
-from graphs import AdjacencyList
+
+from graphs import NamedDynamicProgrammingMatrix, DynamicProgrammingMatrix, AdjacencyList
 
 
 def from_adjacency_list(adjacency: list[str], weighted=False, sep="|"):
@@ -183,6 +184,15 @@ def show_graph(graph: gv.Graph, name='graph', size: str = '8px,4px'):
     graph.graph_attr['size'] = size
     src = gv.Source(graph.source)
     src.view()
+
+
+def floyd_warshall_repr(matrix: DynamicProgrammingMatrix | NamedDynamicProgrammingMatrix, distances):
+    labeled = isinstance(matrix, NamedDynamicProgrammingMatrix)
+    for i in matrix.labels():
+        for j in matrix.labels():
+            index_i = matrix.label_index(i) if labeled else i
+            index_j = matrix.label_index(j) if labeled else j
+            print(f"From {i} to {j}: {distances[index_i][index_j]}")
 
 
 class DisjointSet:
